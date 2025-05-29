@@ -60,7 +60,7 @@ services:
     environment:
       # Disable JavaScript execution in MongoDB
       - MONGO_DISABLE_JAVASCRIPT=true
-    command: ["--bind_ip_all", "--auth=false"] # For development, in production enable auth
+    command: ["--bind_ip_all", "--noauth"] # For development, in production enable auth
     networks:
       - iot_network
     restart: unless-stopped
@@ -86,7 +86,10 @@ services:
     environment:
       - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/}
       - MONGODB_DB=${MONGODB_DB:-iot_metrics}
-      - MODEL_PATH=${MODEL_PATH:-/app/models/llama-2-7b-chat.gguf}
+      - MODEL_PATH=${MODEL_PATH:-/app/models/llama-2-7b-chat.Q4_K_M.gguf}
+      # Optional: HuggingFace token for model download - can be omitted for testing
+      # - HF_TOKEN=${HF_TOKEN:-}
+      # - USE_MOCK_LLM=${USE_MOCK_LLM:-true} # Set to false in production
       # Add rate limits to prevent resource exhaustion
       - RATE_LIMIT_REQUESTS=60
       - RATE_LIMIT_PERIOD=60
