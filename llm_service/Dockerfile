@@ -24,12 +24,12 @@ RUN pip install --no-cache-dir -r requirements.txt && \
   # Remove pip cache
   rm -rf /root/.cache/pip/*
 
-# Create a directory for model storage with proper permissions
-RUN mkdir -p /app/models && \
+# Create directories for model storage and source code with proper permissions
+RUN mkdir -p /app/models /app/src && \
   chown -R appuser:appuser /app
 
-# Copy application code
-COPY . .
+# Copy application code to src directory
+COPY . /app/src/
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
@@ -45,6 +45,9 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=30s --retries=3 \
 
 # Switch to non-root user for running the application
 USER appuser
+
+# Change the working directory to where the source code is mounted
+WORKDIR /app/src
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080"]

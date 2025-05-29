@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # IoT Simulator - generates fake temperature and humidity sensor data
   iot_simulator:
@@ -8,7 +6,7 @@ services:
       dockerfile: Dockerfile
     container_name: iot_simulator
     volumes:
-      - ./iot_simulator:/app:ro # read-only bind mount for security
+      - ./iot_simulator:/app/src:ro # read-only bind mount for security
     environment:
       - SIMULATION_INTERVAL=${SIMULATION_INTERVAL:-5} # seconds between data points
       - METRICS_SERVICE_URL=http://metrics_service:8000/metrics
@@ -26,7 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: metrics_service
     volumes:
-      - ./metrics_service:/app:ro # read-only bind mount for security
+      - ./metrics_service:/app/src:ro # read-only bind mount for security
     ports:
       - "8000:8000"
     environment:
@@ -79,17 +77,17 @@ services:
       dockerfile: Dockerfile
     container_name: llm_service
     volumes:
-      - ./llm_service:/app:ro # read-only bind mount for code
-      - llm_models:/app/models # volume for model storage
+      - ./llm_service:/app/src:ro # read-only bind mount for code
+      - /tmp/models:/tmp/models:ro # mount the existing model directory as read-only
     ports:
       - "127.0.0.1:8080:8080" # Only expose to localhost
     environment:
       - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/}
       - MONGODB_DB=${MONGODB_DB:-iot_metrics}
-      - MODEL_PATH=${MODEL_PATH:-/app/models/llama-2-7b-chat.Q4_K_M.gguf}
+      - MODEL_PATH=/tmp/models/llama-2-7b-chat.Q4_K_M.gguf
+      - USE_MOCK_LLM=false # Production setting - use the real Llama model
       # Optional: HuggingFace token for model download - can be omitted for testing
       # - HF_TOKEN=${HF_TOKEN:-}
-      # - USE_MOCK_LLM=${USE_MOCK_LLM:-true} # Set to false in production
       # Add rate limits to prevent resource exhaustion
       - RATE_LIMIT_REQUESTS=60
       - RATE_LIMIT_PERIOD=60

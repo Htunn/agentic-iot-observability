@@ -8,9 +8,10 @@ RUN groupadd -r appuser && useradd -r -g appuser -d /home/appuser -m appuser
 
 WORKDIR /app
 
-# Install security updates and clean up
+# Install security updates and curl for healthcheck
 RUN apt-get update && \
   apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends curl && \
   apt-get clean && \
   rm -rf /var/lib/apt/lists/*
 
@@ -20,14 +21,17 @@ RUN pip install --no-cache-dir -r requirements.txt && \
   # Remove pip cache
   rm -rf /root/.cache/pip/*
 
-# Copy application code
-COPY . .
+# Create directories for source code with proper permissions
+RUN mkdir -p /app/src && chown -R appuser:appuser /app
 
-# Set proper permissions for the app directory
-RUN chown -R appuser:appuser /app
+# Copy application code to src directory
+COPY . /app/src/
 
 # Use non-root user
 USER appuser
+
+# Change working directory to src
+WORKDIR /app/src
 
 # Expose the API port
 EXPOSE 8000

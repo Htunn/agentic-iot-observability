@@ -10,6 +10,8 @@ import logging
 import json
 import asyncio
 from langchain.llms import LlamaCpp
+from langchain.llms.base import LLM
+from typing import Any, List, Mapping, Optional
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.chains import LLMChain
@@ -55,8 +57,14 @@ except Exception as e:
     logger.warning(f"Error initializing LLM: {e}")
     logger.info("Using mock LLM for development/testing")
     # Use a placeholder LLM that returns simulated responses for testing
-    class MockLLM:
-        def __call__(self, prompt):
+    from langchain.llms.base import LLM
+    from typing import Any, List, Mapping, Optional
+    
+    class MockLLM(LLM):
+        def _llm_type(self) -> str:
+            return "mock_llm"
+            
+        def _call(self, prompt: str, stop: Optional[List[str]] = None) -> str:
             import re
             # Extract query from prompt
             query_match = re.search(r"USER QUERY:\s*(.+?)\s*ANSWER:", prompt, re.DOTALL)
@@ -73,6 +81,10 @@ except Exception as e:
                 return "The Kitchen Sensor reports a temperature of 24.3°C and humidity of 62%."
             else:
                 return "This is a simulated response from the mock LLM. The actual model is not available. Please check that you have downloaded the Llama model and set the correct MODEL_PATH."
+                
+        @property
+        def _identifying_params(self) -> Mapping[str, Any]:
+            return {"model": "mock_llm_model"}
     llm = MockLLM()
     logger.info("Mock LLM initialized for development/testing")
 
