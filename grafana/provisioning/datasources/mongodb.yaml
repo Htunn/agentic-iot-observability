@@ -8,6 +8,5 @@ datasources:
     uid: mongodb
     url: ""
     jsonData:
-      url: ""
       auth_method: "none"
     editable: false

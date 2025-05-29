@@ -1,0 +1,104 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start All Services",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "group": "start",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start With Logs",
+      "type": "shell",
+      "command": "docker compose up",
+      "group": "start",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Stop All Services",
+      "type": "shell",
+      "command": "docker compose down",
+      "group": "stop",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Rebuild and Start Services",
+      "type": "shell",
+      "command": "docker compose up -d --build",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "View IoT Simulator Logs",
+      "type": "shell",
+      "command": "docker compose logs -f iot_simulator",
+      "group": "monitor",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "View Metrics Service Logs",
+      "type": "shell",
+      "command": "docker compose logs -f metrics_service",
+      "group": "monitor",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "View LLM Service Logs",
+      "type": "shell",
+      "command": "docker compose logs -f llm_service",
+      "group": "monitor",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Create Sample LLM Query",
+      "type": "shell",
+      "command": "curl -X POST http://localhost:8080/query -H 'Content-Type: application/json' -d '{\"query\": \"What is the current temperature in the living room?\"}' | jq",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Open Grafana Dashboard",
+      "type": "shell",
+      "command": "open http://localhost:3000",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

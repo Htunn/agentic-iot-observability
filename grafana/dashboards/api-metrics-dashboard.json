@@ -105,13 +105,13 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "mongodb"
           },
-          "format": "table",
+          "format": "timeseries",
           "global_query_id": "",
           "refId": "A",
           "root_selector": "data",
           "source": "url",
           "type": "json",
-          "url": "http://metrics_service:8000/metrics?metric_type=temperature&limit=50",
+          "url": "http://metrics_service:8000/metrics?metric_type=temperature&limit=100",
           "url_options": {
             "method": "GET"
           },
@@ -220,13 +220,13 @@
             "type": "yesoreyeram-infinity-datasource",
             "uid": "mongodb"
           },
-          "format": "table",
+          "format": "timeseries",
           "global_query_id": "",
           "refId": "A",
           "root_selector": "data",
           "source": "url",
           "type": "json",
-          "url": "http://metrics_service:8000/metrics?metric_type=humidity&limit=50",
+          "url": "http://metrics_service:8000/metrics?metric_type=humidity&limit=100",
           "url_options": {
             "method": "GET"
           },
