@@ -9,7 +9,7 @@ import motor.motor_asyncio
 import logging
 import json
 import asyncio
-from langchain.llms import LlamaCpp
+from langchain_community.llms import LlamaCpp
 from langchain.llms.base import LLM
 from typing import Any, List, Mapping, Optional
 from langchain.callbacks.manager import CallbackManager
