@@ -1,0 +1,151 @@
+version: '3.8'
+
+services:
+  # IoT Simulator - generates fake temperature and humidity sensor data
+  iot_simulator:
+    build:
+      context: ./iot_simulator
+      dockerfile: Dockerfile
+    container_name: iot_simulator
+    volumes:
+      - ./iot_simulator:/app:ro # read-only bind mount for security
+    environment:
+      - SIMULATION_INTERVAL=${SIMULATION_INTERVAL:-5} # seconds between data points
+      - METRICS_SERVICE_URL=http://metrics_service:8000/metrics
+    networks:
+      - iot_network
+    restart: unless-stopped
+    depends_on:
+      metrics_service:
+        condition: service_healthy # Only start when metrics service is healthy
+
+  # Metrics Service - collects and stores metrics data
+  metrics_service:
+    build:
+      context: ./metrics_service
+      dockerfile: Dockerfile
+    container_name: metrics_service
+    volumes:
+      - ./metrics_service:/app:ro # read-only bind mount for security
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/}
+      - MONGODB_DB=${MONGODB_DB:-iot_metrics}
+    networks:
+      - iot_network
+    restart: unless-stopped
+    # Health checks and dependency enforcement
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # MongoDB - database for storing metrics
+  mongodb:
+    image: mongo:6.0.8 # Pin version for security and stability
+    container_name: mongodb
+    # Limit MongoDB to localhost access only
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      # Add mongodb config with security settings
+      - ./mongodb/mongod.conf:/etc/mongod.conf:ro
+    environment:
+      # Disable JavaScript execution in MongoDB
+      - MONGO_DISABLE_JAVASCRIPT=true
+    command: ["--bind_ip_all", "--auth=false"] # For development, in production enable auth
+    networks:
+      - iot_network
+    restart: unless-stopped
+    # Health check for MongoDB
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017 --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # LLM Service with Llama model
+  llm_service:
+    build:
+      context: ./llm_service
+      dockerfile: Dockerfile
+    container_name: llm_service
+    volumes:
+      - ./llm_service:/app:ro # read-only bind mount for code
+      - llm_models:/app/models # volume for model storage
+    ports:
+      - "127.0.0.1:8080:8080" # Only expose to localhost
+    environment:
+      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/}
+      - MONGODB_DB=${MONGODB_DB:-iot_metrics}
+      - MODEL_PATH=${MODEL_PATH:-/app/models/llama-2-7b-chat.gguf}
+      # Add rate limits to prevent resource exhaustion
+      - RATE_LIMIT_REQUESTS=60
+      - RATE_LIMIT_PERIOD=60
+    networks:
+      - iot_network
+    restart: unless-stopped
+    # Add resource limits to avoid DoS situations
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 8G
+    # Health check for LLM service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # Grafana for visualization
+  grafana:
+    image: grafana/grafana:10.0.3 # Pin to specific version for security
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro # read-only bind mount
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro # read-only bind mount
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
+      - GF_INSTALL_PLUGINS=grafana-clock-panel
+      # Security settings
+      - GF_SECURITY_ALLOW_EMBEDDING=false
+      - GF_SECURITY_COOKIE_SECURE=true
+      - GF_SECURITY_STRICT_TRANSPORT_SECURITY=true
+      # Disable anonymous access
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+    networks:
+      - iot_network
+    restart: unless-stopped
+    # Health check for Grafana
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+networks:
+  iot_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  grafana_data:
+  llm_models:
