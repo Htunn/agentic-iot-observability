@@ -22,6 +22,7 @@ This directory contains the standalone LLM service for the IoT Observability pro
 
 ### 2. Start the Service
 
+**Production Mode (Docker):**
 ```bash
 # Simple start with auto-configuration
 ./start_llm_service.sh
@@ -30,8 +31,15 @@ This directory contains the standalone LLM service for the IoT Observability pro
 docker-compose -f docker-compose.llm.yml up -d
 ```
 
+**Development Mode (Local):**
+```bash
+# Start with hot reload and local GPU acceleration
+python3 run_dev.py
+```
+
 ### 3. Verify Service
 
+**Production (port 8080):**
 ```bash
 # Check health
 curl http://localhost:8080/health
@@ -40,14 +48,29 @@ curl http://localhost:8080/health
 open http://localhost:8080/docs
 ```
 
+**Development (port 8082):**
+```bash
+# Check health
+curl http://localhost:8082/health
+
+# View API documentation
+open http://localhost:8082/docs
+```
+
 ### 4. Stop the Service
 
+**Production:**
 ```bash
 # Using stop script
 ./stop_llm_service.sh
 
 # Or manually
 docker-compose -f docker-compose.llm.yml down
+```
+
+**Development:**
+```bash
+# Press Ctrl+C in the terminal running run_dev.py
 ```
 
 ## Configuration
@@ -66,7 +89,7 @@ The service can be configured using the following environment variables:
 | `TEMPERATURE` | `0.7` | LLM temperature (creativity) |
 | `N_CTX` | `2048` | Context window size |
 | `N_THREADS` | `4` | Number of CPU threads to use |
-| `MODEL_PATH` | `/tmp/models/llama-2-7b-chat.Q4_K_M.gguf` | Path to the LLM model file |
+| `MODEL_PATH` | `./llm_service/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf` | Path to the LLM model file |
 
 ### Custom Configuration
 
@@ -88,11 +111,11 @@ The service expects a Llama model in GGUF format. You can download one:
 
 ```bash
 # Create models directory
-mkdir -p /tmp/models
+mkdir -p ./llm_service/models
 
-# Download Llama 2 7B Chat model (Q4_K_M quantization)
-wget -O /tmp/models/llama-2-7b-chat.Q4_K_M.gguf \
-  https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf
+# Download TinyLlama 1.1B Chat model (Q4_K_M quantization)
+wget -O ./llm_service/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf \
+  https://huggingface.co/microsoft/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
 ```
 
 ### Using Different Models
@@ -100,7 +123,7 @@ wget -O /tmp/models/llama-2-7b-chat.Q4_K_M.gguf \
 To use a different model, update the `MODEL_PATH` environment variable:
 
 ```bash
-export MODEL_PATH=/tmp/models/your-model.gguf
+export MODEL_PATH=./models/your-model.gguf
 ./start_llm_service.sh
 ```
 
@@ -299,6 +322,46 @@ For production, consider:
 
 ## Development
 
+### Local Development Mode
+
+For rapid development with hot reload and GPU acceleration, use the `run_dev.py` script:
+
+```bash
+# Navigate to LLM service directory
+cd llm_service
+
+# Ensure TinyLlama model is downloaded
+python3 run_dev.py
+```
+
+**Development Features:**
+- **Hot Reload**: Automatically restarts on code changes
+- **Port 8082**: Runs on different port to avoid conflicts with Docker service
+- **Local MongoDB**: Connects to `mongodb://localhost:27017/`
+- **GPU Acceleration**: Automatically detects and uses Metal GPU (macOS) or CUDA (Linux)
+- **Model Auto-detection**: Uses TinyLlama model from `./models/` directory
+- **Debug Logging**: Enhanced logging for development
+
+**Prerequisites for Development:**
+1. Python 3.11+ installed locally
+2. Required Python packages: `pip install -r requirements.txt`
+3. MongoDB running locally (can use the main Docker stack)
+4. TinyLlama model downloaded to `./models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf`
+
+**Development Workflow:**
+```bash
+# 1. Start MongoDB (from main project)
+cd .. && docker compose up -d mongodb
+
+# 2. Start development server
+cd llm_service && python3 run_dev.py
+
+# 3. The service will be available at:
+# - API: http://localhost:8082
+# - Docs: http://localhost:8082/docs
+# - Health: http://localhost:8082/health
+```
+
 ### Building Custom Images
 
 ```bash
@@ -309,7 +372,7 @@ docker build -t iot-llm-service:dev .
 docker build --build-arg PYTHON_VERSION=3.11 -t iot-llm-service:py311 .
 ```
 
-### Development Mode
+### Docker Development Mode
 
 ```bash
 # Mount source for development

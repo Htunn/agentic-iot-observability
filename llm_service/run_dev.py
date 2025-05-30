@@ -36,6 +36,7 @@ def main():
     print(f"🤖 Model Path: {os.environ.get('MODEL_PATH')}")
     print(f"🔗 MongoDB URI: {os.environ.get('MONGODB_URI')}")
     print(f"💾 Database: {os.environ.get('MONGODB_DB')}")
+    print(f"🌐 Service URL: http://localhost:8082")
     print("-" * 50)
     
     # Check if model file exists
@@ -55,7 +56,7 @@ def main():
         uvicorn.run(
             "app:app",
             host="0.0.0.0",
-            port=8081,  # Use different port to avoid conflicts
+            port=8082,  # Use port 8082 to avoid conflicts with containerized service
             reload=True,
             log_level="info"
         )

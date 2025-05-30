@@ -119,6 +119,8 @@ The LLM service allows you to query IoT metrics using natural language. Example 
 - Which room is the hottest right now?
 - What's the average temperature across all sensors?
 
+### Production Mode (Docker)
+
 Send queries to the LLM service API endpoint:
 
 ```bash
@@ -126,6 +128,30 @@ curl -X POST http://localhost:8080/query \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the current temperature in the living room?"}'
 ```
+
+### Development Mode (Local)
+
+For local development with hot reload and GPU acceleration:
+
+```bash
+# Navigate to LLM service directory
+cd llm_service
+
+# Run the development server (requires TinyLlama model)
+python3 run_dev.py
+```
+
+The development server will:
+- Start on port 8082 (to avoid conflicts with containerized service)
+- Enable hot reload for code changes
+- Use local MongoDB connection (mongodb://localhost:27017/)
+- Automatically detect and use Metal GPU acceleration (on macOS)
+- Load the TinyLlama model from `llm_service/models/`
+
+Access the development API at:
+- API: http://localhost:8082
+- Documentation: http://localhost:8082/docs
+- Health check: http://localhost:8082/health
 
 ## Project Structure
 

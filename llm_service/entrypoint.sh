@@ -2,7 +2,7 @@
 set -e
 
 # Check if model exists - default to /app/models for writable filesystem
-MODEL_PATH=${MODEL_PATH:-"/app/models/llama-2-7b-chat.Q4_K_M.gguf"}
+MODEL_PATH=${MODEL_PATH:-"/app/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"}
 MODEL_DIR=$(dirname "$MODEL_PATH")
 
 if [ ! -f "$MODEL_PATH" ]; then
@@ -49,8 +49,8 @@ os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '0'
 
 try:
     file_path = hf_hub_download(
-        repo_id='TheBloke/Llama-2-7B-Chat-GGUF', 
-        filename='llama-2-7b-chat.Q4_K_M.gguf',
+        repo_id='microsoft/TinyLlama-1.1B-Chat-v1.0-GGUF', 
+        filename='tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf',
         token=os.environ.get('HF_TOKEN'),
         local_dir='$MODEL_DIR',
         local_dir_use_symlinks=False
@@ -63,8 +63,8 @@ except Exception as e:
   
     
     # Rename the downloaded file if needed
-    if [ -f "$MODEL_DIR/llama-2-7b-chat.Q4_K_M.gguf" ] && [ "$MODEL_DIR/llama-2-7b-chat.Q4_K_M.gguf" != "$MODEL_PATH" ]; then
-      mv "$MODEL_DIR/llama-2-7b-chat.Q4_K_M.gguf" "$MODEL_PATH"
+    if [ -f "$MODEL_DIR/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf" ] && [ "$MODEL_DIR/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf" != "$MODEL_PATH" ]; then
+      mv "$MODEL_DIR/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf" "$MODEL_PATH"
     fi
   fi
 else

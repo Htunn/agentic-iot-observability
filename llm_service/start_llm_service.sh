@@ -40,13 +40,13 @@ echo "  Context Size: $N_CTX"
 echo "  Threads: $N_THREADS"
 
 # Check for model file
-MODEL_PATH="/tmp/models/llama-2-7b-chat.Q4_K_M.gguf"
+MODEL_PATH="./models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
 if [ ! -f "$MODEL_PATH" ]; then
     echo "Warning: Model file not found at $MODEL_PATH"
     echo "You may need to download the model or set USE_MOCK_LLM=true"
     echo "To download the model, you can use:"
-    echo "  mkdir -p /tmp/models"
-    echo "  wget -O $MODEL_PATH https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf"
+    echo "  mkdir -p ./models"
+    echo "  wget -O $MODEL_PATH https://huggingface.co/microsoft/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
     echo ""
     echo "Or set USE_MOCK_LLM=true to use mock responses for testing"
     read -p "Continue anyway? (y/N): " -n 1 -r

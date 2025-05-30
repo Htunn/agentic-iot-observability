@@ -70,46 +70,7 @@ services:
       retries: 3
       start_period: 20s
 
-  # LLM Service with Llama model
-  llm_service:
-    build:
-      context: ./llm_service
-      dockerfile: Dockerfile
-    container_name: llm_service
-    volumes:
-      - ./llm_service:/app/src:ro # read-only bind mount for code
-      - /tmp/models:/tmp/models:ro # mount the existing model directory as read-only
-    ports:
-      - "127.0.0.1:8080:8080" # Only expose to localhost
-    environment:
-      - MONGODB_URI=${MONGODB_URI:-mongodb://mongodb:27017/}
-      - MONGODB_DB=${MONGODB_DB:-iot_metrics}
-      - MODEL_PATH=/tmp/models/llama-2-7b-chat.Q4_K_M.gguf
-      - USE_MOCK_LLM=false # Production setting - use the real Llama model
-      # Optional: HuggingFace token for model download - can be omitted for testing
-      # - HF_TOKEN=${HF_TOKEN:-}
-      # Add rate limits to prevent resource exhaustion
-      - RATE_LIMIT_REQUESTS=60
-      - RATE_LIMIT_PERIOD=60
-    networks:
-      - iot_network
-    restart: unless-stopped
-    # Add resource limits to avoid DoS situations
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 8G
-    # Health check for LLM service
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
-      interval: 60s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    depends_on:
-      mongodb:
-        condition: service_healthy
+
 
   # Grafana for visualization
   grafana:
@@ -149,4 +110,3 @@ networks:
 volumes:
   mongodb_data:
   grafana_data:
-  llm_models:

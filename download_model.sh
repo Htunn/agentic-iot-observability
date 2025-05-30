@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Define model path and URL
-MODEL_PATH="/tmp/models/llama-2-7b-chat.Q4_K_M.gguf"
-MODEL_URL="https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/resolve/main/llama-2-7b-chat.Q4_K_M.gguf"
+MODEL_PATH="./llm_service/models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
+MODEL_URL="https://huggingface.co/microsoft/TinyLlama-1.1B-Chat-v1.0-GGUF/resolve/main/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
 MODEL_DIR="$(dirname "$MODEL_PATH")"
 
 # Print status message
-echo "Checking for Llama model at $MODEL_PATH"
+echo "Checking for TinyLlama model at $MODEL_PATH"
 
 # Create directory if it doesn't exist
 if [ ! -d "$MODEL_DIR" ]; then
