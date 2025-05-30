@@ -21,9 +21,25 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Configure pip for better network handling and install dependencies
+# Configure pip for better network handling and install basic dependencies first
 RUN pip install --upgrade pip && \
-  pip install --no-cache-dir --timeout 300 --retries 3 -r requirements.txt && \
+  pip install --no-cache-dir --timeout 300 --retries 3 \
+  fastapi uvicorn pymongo motor python-dotenv pydantic starlette \
+  langchain langchain-community huggingface-hub
+
+# Install llama-cpp-python with CPU optimization for Linux containers
+# Use CPU-optimized build since Metal GPU is not available in Linux containers
+ENV CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS"
+ENV FORCE_CMAKE=1
+
+# Install OpenBLAS for CPU optimization
+RUN apt-get update && apt-get install -y \
+  libopenblas-dev \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir --timeout 600 --retries 3 \
+  llama-cpp-python==0.3.2 && \
   # Remove pip cache
   rm -rf /root/.cache/pip/*
 

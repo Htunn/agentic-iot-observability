@@ -1,8 +1,8 @@
 #!/bin/bash
 set -e
 
-# Check if model exists - default to /tmp for writable filesystem
-MODEL_PATH=${MODEL_PATH:-"/tmp/models/llama-2-7b-chat.Q4_K_M.gguf"}
+# Check if model exists - default to /app/models for writable filesystem
+MODEL_PATH=${MODEL_PATH:-"/app/models/llama-2-7b-chat.Q4_K_M.gguf"}
 MODEL_DIR=$(dirname "$MODEL_PATH")
 
 if [ ! -f "$MODEL_PATH" ]; then

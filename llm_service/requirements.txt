@@ -7,5 +7,19 @@ pydantic==2.10.4
 starlette==0.41.3
 langchain==0.3.13
 langchain-community==0.3.13
+langchain-core==0.3.27
+
+# Install llama-cpp-python with CPU optimization for containerized environments
+# For GPU support, the container will attempt to detect and use available GPUs
 llama-cpp-python==0.3.2
+
+# HuggingFace integration for model management
 huggingface-hub==0.27.0
+
+# GPU detection and optimization libraries (optional, will be skipped if not available)
+# These are marked as optional and the code handles ImportError gracefully
+pyopencl; platform_machine != "arm64"  # OpenCL support (not on ARM64/M1)
+
+# Additional dependencies for better performance and monitoring
+httpx==0.27.2  # For async HTTP requests if needed
+psutil==6.1.0  # For system resource monitoring
