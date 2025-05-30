@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 *.github
+llm_service/.venv
 
 
 # Docker volumes
