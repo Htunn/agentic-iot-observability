@@ -292,7 +292,14 @@ The LLM service allows you to query IoT metrics using natural language. Example 
 
 Send queries to the LLM service API endpoint:
 
+# Navigate to LLM service directory
+
 ```bash
+# Navigate to LLM service directory
+cd llm_service
+
+docker compose up -d
+
 curl -X POST http://localhost:8080/query \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the current temperature in the living room?"}'
@@ -308,6 +315,14 @@ cd llm_service
 
 # Run the development server (requires TinyLlama model)
 python3 run_dev.py
+```
+
+Send queries to the LLM service API endpoint:
+
+```bash
+curl -X POST http://localhost:8082/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "What is the current temperature in the living room?"}'
 ```
 
 The development server will:
