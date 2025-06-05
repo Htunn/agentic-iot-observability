@@ -78,6 +78,175 @@ sequenceDiagram
     LLM->>LLM: Health check (every 30s)
 ```
 
+### Agentic LLM Workflow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User as User/API Client
+    participant LLM as LLM Service
+    participant Agent as LLM Agent
+    participant DB as MongoDB
+    participant Metrics as Metrics Service
+    participant Analysis as Analysis Engine
+
+    rect rgb(240, 240, 255)
+        Note over User, Analysis: Agentic Query Processing
+        User->>LLM: POST /query {"query": "Is there a temperature anomaly in the kitchen?"}
+        
+        LLM->>Agent: Parse query intent
+        Agent->>Agent: Determine required metrics and analysis
+        
+        Agent->>DB: Query historical temperature data for kitchen
+        DB-->>Agent: Return historical temperature data
+        
+        Agent->>Analysis: Perform anomaly detection
+        Analysis->>Analysis: Apply statistical algorithms
+        Analysis-->>Agent: Anomaly analysis results
+        
+        Agent->>Metrics: GET /metrics?location=kitchen&hours=24
+        Metrics->>DB: Query recent kitchen metrics
+        DB-->>Metrics: Return kitchen data
+        Metrics-->>Agent: Latest kitchen metrics
+        
+        Agent->>Agent: Synthesize response with context
+        Agent-->>LLM: Structured analysis with explanation
+        
+        LLM-->>User: "I've analyzed the kitchen temperature data. There appears to be an anomaly at 14:30 today, where the temperature spiked to 32°C, which is 8°C above the normal range for that time of day."
+    end
+    
+    rect rgb(255, 240, 240)
+        Note over User, Analysis: Autonomous Action Recommendation
+        User->>LLM: POST /query {"query": "What should I do about high humidity in the basement?"}
+        
+        LLM->>Agent: Parse query intent
+        Agent->>Agent: Identify action recommendation task
+        
+        Agent->>DB: Query humidity patterns in basement
+        DB-->>Agent: Return humidity history
+        
+        Agent->>DB: Query related temperature data
+        DB-->>Agent: Return temperature data
+        
+        Agent->>Analysis: Cross-analyze humidity and temperature
+        Analysis-->>Agent: Correlation analysis
+        
+        Agent->>Agent: Generate recommended actions
+        Agent-->>LLM: Structured recommendations
+        
+        LLM-->>User: "Based on the data, basement humidity has been above 75% for 3 days. I recommend: 1) Check for water leaks near the north wall where temperature readings are also abnormal, 2) Improve ventilation - current air exchange rate is low, 3) Consider a dehumidifier rated for your basement square footage. Would you like me to explain any of these recommendations in more detail?"
+    end
+```
+
+### Component Diagram
+
+```mermaid
+graph TB
+    subgraph "Data Generation Layer"
+        IoT[IoT Simulator]
+        RealIoT[Real IoT Devices]
+    end
+    
+    subgraph "Data Collection Layer"
+        MetricsAPI[Metrics Service API]
+        MetricsAPI -->|Store| MongoDB[(MongoDB)]
+    end
+    
+    subgraph "Analytics Layer"
+        LLM[LLM Service]
+        LLM -->|Query| MongoDB
+        LLM -->|Embeddings| VectorDB[(Vector Store)]
+    end
+    
+    subgraph "Visualization Layer"
+        Grafana[Grafana Dashboards]
+        Grafana -->|Query| MetricsAPI
+    end
+    
+    subgraph "User Interaction Layer"
+        CLI[Command Line Interface]
+        WebUI[Web UI]
+        API[REST API]
+        
+        CLI -->|Queries| LLM
+        WebUI -->|Visualization| Grafana
+        WebUI -->|Queries| LLM
+        API -->|CRUD Operations| MetricsAPI
+        API -->|Natural Language Queries| LLM
+    end
+    
+    subgraph "Agent Components"
+        QueryParser[Query Parser]
+        ContextBuilder[Context Builder]
+        ResponseGenerator[Response Generator]
+        ActionRecommender[Action Recommender]
+        AnomalyDetector[Anomaly Detector]
+        
+        LLM -->|Uses| QueryParser
+        LLM -->|Uses| ContextBuilder
+        LLM -->|Uses| ResponseGenerator
+        LLM -->|Uses| ActionRecommender
+        LLM -->|Uses| AnomalyDetector
+    end
+    
+    IoT -->|Generate Data| MetricsAPI
+    RealIoT -->|Send Data| MetricsAPI
+    
+    style IoT fill:#f9f9ff,stroke:#9370db,stroke-width:2px
+    style LLM fill:#f9f9ff,stroke:#9370db,stroke-width:2px
+    style Grafana fill:#f9f9ff,stroke:#9370db,stroke-width:2px
+    style MongoDB fill:#f5f5f5,stroke:#666,stroke-width:2px
+    style VectorDB fill:#f5f5f5,stroke:#666,stroke-width:2px
+```
+
+### Deployment Diagram
+
+```mermaid
+flowchart TB
+    subgraph "Host Machine / Cloud Provider"
+        subgraph "Docker Environment"
+            subgraph "Data Processing"
+                iot[IoT Simulator Container]
+                metrics[Metrics Service Container]
+                mongo[MongoDB Container]
+                
+                iot -->|port 8000| metrics
+                metrics -->|port 27017| mongo
+            end
+            
+            subgraph "Intelligence Layer"
+                llm[LLM Service Container]
+                llm -->|port 27017| mongo
+            end
+            
+            subgraph "Visualization"
+                grafana[Grafana Container]
+                grafana -->|port 8000| metrics
+            end
+            
+            subgraph "Persistence Volumes"
+                mongodata[MongoDB Volume]
+                modeldata[LLM Model Volume]
+                grafanadata[Grafana Volume]
+                
+                mongo -.-> mongodata
+                llm -.-> modeldata
+                grafana -.-> grafanadata
+            end
+        end
+        
+        user[User / Client] -->|port 3000| grafana
+        user -->|port 8000| metrics
+        user -->|port 8080| llm
+    end
+    
+    style iot fill:#e6f7ff,stroke:#1890ff
+    style metrics fill:#e6f7ff,stroke:#1890ff
+    style mongo fill:#f0f5ff,stroke:#597ef7
+    style llm fill:#f6ffed,stroke:#52c41a
+    style grafana fill:#fff7e6,stroke:#fa8c16
+    style user fill:#fff0f6,stroke:#eb2f96
+```
+
 ### Component Interactions
 
 1. **Data Generation**: IoT Simulator continuously generates temperature and humidity metrics for 5 virtual devices
