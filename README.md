@@ -313,6 +313,12 @@ For local development with hot reload and GPU acceleration:
 # Navigate to LLM service directory
 cd llm_service
 
+python3.12 -m venv .venv
+
+source .venv/bin/activate
+
+pip3 install -r requirements.txt
+
 # Run the development server (requires TinyLlama model)
 python3 run_dev.py
 ```
