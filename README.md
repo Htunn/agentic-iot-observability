@@ -1,4 +1,4 @@
-# IoT Observability Project
+# Agentic IoT Observability Project
 
 This project implements a complete observability solution for IoT devices, collecting temperature and humidity metrics, storing them in MongoDB, visualizing them in Grafana, and enabling natural language queries through an LLM (Llama) service.
 
